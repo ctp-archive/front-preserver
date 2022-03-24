@@ -1,0 +1,11 @@
+---
+layout: layout.njk
+---
+
+<ul>
+  {% for inbox in inboxes %}
+    <li>
+      <a href="{{inbox.name}}.html">{{inbox.name}}</a>
+    </li>
+  {% endfor %}
+</ul>

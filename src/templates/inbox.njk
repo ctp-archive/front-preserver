@@ -1,0 +1,25 @@
+---
+layout: layout.njk
+pagination:
+  data: inboxes
+  size: 1
+  alias: inbox
+permalink: "{{ inbox.name | slug }}.html"
+---
+<ul role="nav" class="breadcrumb">
+  <li>
+    <a href="index.html">Home</a>
+  </li>
+  <li class="current">
+    {{ inbox.name }}
+  </li>
+</ul>
+
+<h1>Inbox {{ inbox.name }}</h1>
+<ul>
+  {% for message in inbox.messages %}
+    <li>{{message.top.created_at | date}}: 
+    <a href="messages/{{message.id}}.html">{{message.top.subject}}</a>
+    </li>
+  {% endfor %}
+</ul>

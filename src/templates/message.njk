@@ -1,0 +1,45 @@
+---
+layout: layout.njk
+pagination:
+  data: messages
+  size: 1
+  alias: message
+permalink: "messages/{{ message.id }}.html"
+---
+<ul role="nav" class="breadcrumb">
+  <li>
+    <a href="../index.html">Home</a>
+  </li>
+  <li>
+    <a href="../{{ message.inbox }}.html">{{ message.inbox }}</a>
+  </li>
+  <li class="current">
+    {{ message.messages[0].subject }}
+  </li>
+</ul>
+
+</ul>
+<h1>{{ message.top.subject }}</h1>
+<p>{{message.top.created_at | date }}</p>
+
+<h2>Messages</h2>
+
+{% for mail in message.messages %}
+<div class="message {% if mail._type === "comment" %}comment{% endif %}">
+{% if mail._type === "comment" %}
+  <div class="from">
+    <strong>Comment from</strong>
+    {{ mail.author.full_name}}
+  </div>
+{% endif %}
+{% if mail._type === "message" %}
+  <div class="from">
+    <strong>From</strong>
+    {{ mail._author.name }} -  {{ mail._author.handle }}
+  </div>
+{% endif %}
+<div class="body">
+  {{ mail.html | safe}}
+</div>
+</div>
+{% endfor %}

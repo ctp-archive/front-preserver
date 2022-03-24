@@ -1,0 +1,18 @@
+{
+  "name": "front-preserver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "front-preserver": "cmd.js"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "^1.0.0",
+    "command-line-args": "^5.2.1",
+    "fast-glob": "^3.2.11",
+    "is-image": "^3.0.0",
+    "luxon": "^2.3.1",
+    "nunjucks": "^3.2.3"
+  }
+}
