@@ -6,7 +6,7 @@ pagination:
   alias: inbox
 permalink: "{{ inbox.name | slug }}.html"
 ---
-<ul role="nav" class="breadcrumb">
+<ul role="navigation" class="breadcrumb">
   <li>
     <a href="index.html">Home</a>
   </li>
@@ -16,10 +16,23 @@ permalink: "{{ inbox.name | slug }}.html"
 </ul>
 
 <h1>Inbox {{ inbox.name }}</h1>
-<ul>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>From</th>
+      <th>Subject</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
   {% for message in inbox.messages %}
-    <li>{{message.top.created_at | date}}: 
-    <a href="messages/{{message.id}}.html">{{message.top.subject}}</a>
+    <tr>
+      <td>
+        <a href="messages/{{message.id}}.html">{{message.top.created_at | date}}</a>
+      </td>
+      <td>{{message.top.author.full_name}}</td>
+      <td>{{message.top.subject}}
+        {{message.id}}</td>
     </li>
   {% endfor %}
 </ul>

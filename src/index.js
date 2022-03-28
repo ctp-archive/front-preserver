@@ -1,17 +1,28 @@
 import fs from 'fs'
 import fg from 'fast-glob'
 import isImage from 'is-image'
-import Eleventy from '@11ty/eleventy'
-import { DateTime } from 'luxon'
+import ora from 'ora'
+import chalk from 'chalk'
+import crypto from 'crypto'
+import buildHtml from './build-html.js'
 
 const messages = []
 const inboxes = []
 
-export default async ({ source, output }) => {
+export default async ({ templates, source, output, name, dev, port }) => {
+  const spinner = ora({
+    spinner: 'boxBounce',
+    text: 'Parsing Front files',
+  }).start()
+
   if (!fs.existsSync(`${output}/attachments/`)) {
     fs.mkdirSync(`${output}/attachments/`, { recursive: true })
   }
+
   const files = await fg([`${source}/inboxes/shared_inboxes/**/*.*`])
+
+  spinner.text = `Parsing ${files.length} Front files`
+
   files
     .filter((file) => file.search('.json') > -1)
     .forEach((file) => {
@@ -27,25 +38,42 @@ export default async ({ source, output }) => {
       if (messages.findIndex((message) => message.id === id) === -1) {
         messages.push({
           id,
-          inbox,
+          inboxes: [inbox],
           messages: [],
+          top: false,
         })
       }
       const key = messages.findIndex((message) => message.id === id)
       const type = filename.search('msg_') > -1 ? 'message' : 'comment'
       const fileParts = filename.replace('.json', '').split('_')
       const typeId = fileParts[1]
+      const contents = fs.readFileSync(file)
+      const hash = crypto.createHash('sha1').update(contents).digest('hex')
+      /*
+       * Because messages can be duplicated across inboxes, we hash them and skip
+       * if they already exist.
+       */
+      if (messages[key].messages.find((message) => message._hash === hash)) {
+        if (messages[key].inboxes.indexOf(inbox) === -1) {
+          messages[key].inboxes.push(inbox)
+        }
+        return
+      }
+
       messages[key].messages.push({
         _id: typeId,
         _type: type,
-        top: false,
+        _hash: hash,
         attachments: [],
-        ...JSON.parse(fs.readFileSync(file)),
+        ...JSON.parse(contents),
       })
-      messages[key].messages = messages[key].messages.sort((a, b) => {
-        a.created_at > b.created_at ? 1 : -1
-      })
-      messages[key].top = messages[key].messages[0]
+      messages[key].top = messages[key].messages.filter(
+        (message) => message._type === 'message'
+      )
+        ? messages[key].messages.filter(
+            (message) => message._type === 'message'
+          )[0]
+        : null
       messages[key].messages.forEach((message, index) => {
         if (typeof message.recipients === 'undefined') {
           return
@@ -82,21 +110,11 @@ export default async ({ source, output }) => {
         }
       }
     })
-  const elev = new Eleventy('./src/templates', output, {
-    config: function (eleventyConfig) {
-      eleventyConfig.addGlobalData('messages', messages)
-      eleventyConfig.addGlobalData(
-        'inboxes',
-        inboxes.map((name) => ({
-          name,
-          messages: messages.filter((message) => message.inbox === name),
-        }))
-      )
 
-      eleventyConfig.addFilter('date', (str) =>
-        DateTime.fromMillis(str).toLocaleString(DateTime.DATETIME_FULL)
-      )
-    },
+  spinner.stopAndPersist({
+    symbol: chalk.green('✔️'),
+    text: `Loaded ${files.length.toLocaleString()} Front files`,
   })
-  await elev.write()
+
+  buildHtml({ templates, output, name, dev, port, messages, inboxes })
 }

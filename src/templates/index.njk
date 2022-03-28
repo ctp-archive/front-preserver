@@ -1,7 +1,9 @@
 ---
 layout: layout.njk
 ---
-
+<h1>{{ name }}</h1>
+<p>This is a collection of messages from the <a href="http://front.com/">Front</a> customer support product generated on <strong>{{ now }}</strong>.</p>
+<h2>Inboxes</h2>
 <ul>
   {% for inbox in inboxes %}
     <li>

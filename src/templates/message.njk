@@ -6,12 +6,9 @@ pagination:
   alias: message
 permalink: "messages/{{ message.id }}.html"
 ---
-<ul role="nav" class="breadcrumb">
+<ul role="navigation" class="breadcrumb">
   <li>
     <a href="../index.html">Home</a>
-  </li>
-  <li>
-    <a href="../{{ message.inbox }}.html">{{ message.inbox }}</a>
   </li>
   <li class="current">
     {{ message.messages[0].subject }}
@@ -20,26 +17,71 @@ permalink: "messages/{{ message.id }}.html"
 
 </ul>
 <h1>{{ message.top.subject }}</h1>
-<p>{{message.top.created_at | date }}</p>
+<div>
+<strong>{{message.top.created_at | date }}</strong>
+</div>
+<div class="message-inboxes">
+<strong>Inbox{%if message.inboxes.length > 1 %}es{% endif %}:
+</strong>
+<ul >
+{% for inbox in message.inboxes %}
+  <li>
+    <a href="../{{ inbox }}.html">{{ inbox }}</a>
+  </li>
+{% endfor %}
+</ul>
+</div>
 
 <h2>Messages</h2>
 
 {% for mail in message.messages %}
 <div class="message {% if mail._type === "comment" %}comment{% endif %}">
-{% if mail._type === "comment" %}
-  <div class="from">
-    <strong>Comment from</strong>
-    {{ mail.author.full_name}}
-  </div>
-{% endif %}
-{% if mail._type === "message" %}
-  <div class="from">
-    <strong>From</strong>
-    {{ mail._author.name }} -  {{ mail._author.handle }}
-  </div>
-{% endif %}
-<div class="body">
-  {{ mail.html | safe}}
+
+<div class="from">
+
+  <h2>
+    {% if mail._type === "comment" %}Comment{% else %}{{ mail.subject }}
+    {% endif %}
+  </h2>
+  <dl>
+    <div>
+      <dt>From:</dt>
+      <dd>
+        {% if mail._type === "message" %}{{ mail._author.name }} -  {{ mail._author.handle }}
+        {% else %}{{ mail.author.full_name}}
+        {% endif %}
+      </dd>
+    </div>
+    <div>
+      <dt>Created:</dt>
+      <dd>{{ mail.created_at | date }}</dd>
+    </div>
+    <div>
+      <dt>ID:</dt>
+      <dd>
+        <a href="#{{ mail._id }}" class="anchor">{{ mail._id }}</a>
+      </dd>
+    </div>
+  </dl>
 </div>
+<div class="body">
+  {% if mail.html %}
+    {{ mail.html | sanitize | safe }}
+  {% else %}
+    {{mail.text | markdown | sanitize | safe }}
+  {% endif %}
+</div>
+{% if mail.attachments.length %}
+  <div class="attachments">
+    <h3>Attachments</h3>
+    {% for attachment in mail.attachments %}
+      {% if attachment.isImage %}
+        <img src="../attachments/{{ attachment.file }}" alt=""/>
+      {% else %}
+        <a href="../attachments/{{ attachment.file }}">{{ attachment.file }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
 </div>
 {% endfor %}
