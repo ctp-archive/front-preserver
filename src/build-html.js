@@ -36,7 +36,7 @@ export default async ({
         'messages',
         messages.map((message) => {
           message.messages.sort((a, b) =>
-            a.created_at > b.created_at ? -1 : 1
+            a.created_at > b.created_at ? 1 : -1
           )
           return message
         })

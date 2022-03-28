@@ -70,9 +70,9 @@ export default async ({ templates, source, output, name, dev, port }) => {
       messages[key].top = messages[key].messages.filter(
         (message) => message._type === 'message'
       )
-        ? messages[key].messages.filter(
-            (message) => message._type === 'message'
-          )[0]
+        ? messages[key].messages
+            .filter((message) => message._type === 'message')
+            .sort((a, b) => (a.created_at > b.created_at ? 1 : -1))[0]
         : null
       messages[key].messages.forEach((message, index) => {
         if (typeof message.recipients === 'undefined') {

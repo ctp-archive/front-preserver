@@ -30,7 +30,7 @@ permalink: "{{ inbox.name | slug }}.html"
       <td>
         <a href="messages/{{message.id}}.html">{{message.top.created_at | date}}</a>
       </td>
-      <td>{{message.top.author.full_name}}</td>
+      <td>{{message.top._author.name}}</td>
       <td>{{message.top.subject}}
         {{message.id}}</td>
     </li>
