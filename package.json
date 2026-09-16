@@ -18,6 +18,6 @@
     "marked": "^4.0.12",
     "nunjucks": "^3.2.3",
     "ora": "^6.1.0",
-    "sanitize-html": "^2.7.0"
+    "sanitize-html": "^2.17.7"
   }
 }
